@@ -50,7 +50,7 @@ X=X.sort_index().reset_index(drop=True)
 
 for i in range (100): #define it
 
-    if X.type[i] =1 : 
+    if X.type[i] ==1 : 
         pass
 
 
