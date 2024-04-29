@@ -1,4 +1,5 @@
-# -*- coding: utf-8 -*-
+#%%
+
 """
 Created on Thu Apr 11 14:44:33 2024
 
@@ -114,9 +115,9 @@ plt.title("Evolution du stock")
 plt.ylim(0)
 plt.show()
 
-
-X.to_csv("export_X_V1.csv")
     
             
 
 
+
+# %%
