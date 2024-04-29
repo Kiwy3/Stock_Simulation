@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+
 lambda1 = 15
 lambda1 = 30
 L = 1
@@ -112,6 +113,9 @@ plt.plot(X.index, X.stock)
 plt.title("Evolution du stock")
 plt.ylim(0)
 plt.show()
+
+
+X.to_csv("export_X_V1.csv")
     
             
 
