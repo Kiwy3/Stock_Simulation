@@ -9,18 +9,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+#On suppose qu'aucun évenement ne peut arriver totalement en même temps
 
-lambda1 = 15
-lambda1 = 30
+lambda1 = 15 #Commande hors ligne
+lambda2 = 30 #Commande en ligne
 L = 1
 W=1
 F=18 #Price
 h = 0.05 #Price
 p = 20 #Price
 b = 5 #Price
-Q = 180
-r = 5
-K = 10
+Q = 180 #Quantité de commande
+r = 5 #Point de recommande
+K = 10 #Priorité de classe
 
 def tirage(l1,l2,n):   
    Tempo = np.full((n,3),0)
@@ -53,23 +54,71 @@ def tirage(l1,l2,n):
            t2 = t2+p2            
    return Tempo
 
-"""Mise en place situation initiale"""
-X = pd.DataFrame(tirage(15,30,100),columns= ["time","cmd_type_1","cmd_type_2"])
-X["stock"] = 0
-X.loc[-1]=[0,0,0,r]
-X=X.sort_index().set_index("time")
-X["nb_cmd"]= X["cmd_type_1"] + X["cmd_type_2"]
-X["deliv"]=0
-X["incoming"]=0
-X["perte_magasin"]=0
-X["en_attente"] = 0
+
+col= ["time","event_type","stock","attente","incoming","perte_magasin","deliv"]
+timeline = np.full(7,0)
+timeline[2] = r
+
+
+def commande(lamb1,lamb2):
+    lamb = lamb1 + lamb2
+    t = np.random.exponential(lamb)
+    c = np.random.uniform()
+    p1 = lamb1/(lamb1+lamb2)
+    if c>p1 : 
+        cm = 2
+    else : 
+        cm = 1
+    return t,cm
+
+commande(lambda1,lambda2)
+i=0
+time_appro = 800
+t=0
+while i<10:
+    delay_cmd, type_cmd = commande(lambda1,lambda2)
+    time_cmd = delay_cmd+t
+    stock_temp = timeline[-1,2]
+
+    #Une commande arrive
+    if time_cmd<time_appro : 
+        event_temp = type_cmd
+
+        #Commande hors ligne
+        if type_cmd ==1: 
+            if stock_temp>1: 
+                stock_temp -= 1
+                deliv_temp = 1
+            else : 
+                perte_temp = 1
+
+        #Commande en ligne
+        else : 
+            attente_temp = timeline[-1,3]
+            if stock_temp>K:
+                stock_temp -= 1
+                deliv_temp = 1
+            else : 
+                attente_temp = 1
+    
+    #Une livraison arrive
+    else : 
+        stock_temp += 
+
+
+
+
+
+    i=i+1
+
+
 
 
 """ full timeline
 full_time_array = np.full(max(X["time"]), range(max(X["time"])))
 timeline = pd.DataFrame(full_time_array,columns=["time"])"""
 
-
+"""
 i = 1 
 while i< len(X):
     X.stock.iloc[i]=X.stock.iloc[i-1]-X.deliv.iloc[i-1]+X.incoming.iloc[i-1]
@@ -107,16 +156,13 @@ while i< len(X):
         
         
     i+=1
-
-"""Plot the stock evolution"""
+"""
+"""Plot the stock evolution
 plt.plot(X.index, X.stock)
 plt.title("Evolution du stock")
 plt.ylim(0)
-plt.show()
-
-
-X.to_csv("export_X_V1.csv")
-    
+<<<<<<< HEAD
+plt.show()""" 
             
 
-
+a=1
