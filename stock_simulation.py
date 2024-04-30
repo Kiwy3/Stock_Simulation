@@ -20,7 +20,7 @@ h = 0.05 #Price
 p = 20 #Price
 b = 5 #Price
 Q = 180 #Quantité de commande
-r = 5 #Point de recommande
+r = 60 #Point de recommande
 K = 10 #Priorité de classe
 
 def tirage(l1,l2,n):   
@@ -54,15 +54,9 @@ def tirage(l1,l2,n):
            t2 = t2+p2            
    return Tempo
 
-
-col= ["time","event_type","stock","attente","incoming","perte_magasin","deliv"]
-timeline = np.full(7,0)
-timeline[2] = r
-
-
 def commande(lamb1,lamb2):
     lamb = lamb1 + lamb2
-    t = np.random.exponential(lamb)
+    t = np.random.exponential(1/lamb)
     c = np.random.uniform()
     p1 = lamb1/(lamb1+lamb2)
     if c>p1 : 
@@ -71,40 +65,54 @@ def commande(lamb1,lamb2):
         cm = 1
     return t,cm
 
-commande(lambda1,lambda2)
-i=0
+col= ["time","event_type","stock","attente","perte_magasin","deliv"]
+Timeline = pd.DataFrame(columns=col)
+r=2
+Timeline.loc[0] = [0.,-1,r,0,0,0]
+
+#Init value
+i=1
 time_appro = 800
 t=0
+
 while i<10:
+    Timeline.loc[i]=np.full(6,0)
+    
+    #Génération nouvelle commande
     delay_cmd, type_cmd = commande(lambda1,lambda2)
     time_cmd = delay_cmd+t
-    stock_temp = timeline[-1,2]
 
     #Une commande arrive
     if time_cmd<time_appro : 
+        Timeline.loc[i,"time"] = Timeline.loc[i-1,"time"]+time_cmd
         event_temp = type_cmd
 
         #Commande hors ligne
         if type_cmd ==1: 
-            if stock_temp>1: 
-                stock_temp -= 1
-                deliv_temp = 1
+            Timeline.loc[i,"event_type"]=1
+            if Timeline.loc[i-1,"stock"]>1: #Stock dispo, on livre
+                Timeline.loc[i,"stock"] = Timeline.loc[i-1,"stock"]-1
+                Timeline.loc[i,"deliv"] = 1
             else : 
-                perte_temp = 1
+                Timeline.loc[i,"perte_magasin"] = 1
 
         #Commande en ligne
         else : 
-            attente_temp = timeline[-1,3]
-            if stock_temp>K:
-                stock_temp -= 1
-                deliv_temp = 1
+            Timeline.loc[i,"event_type"]= 2
+            if Timeline.loc[i-1,"stock"]>K: #Stock dispo, on livre
+                Timeline.loc[i,"stock"] = Timeline.loc[i-1,"stock"]-1
+                Timeline.loc[i,"deliv"] = 1
             else : 
-                attente_temp = 1
+                Timeline.loc[i,"attente"] = Timeline.loc[i-1,"attente"]+1
     
     #Une livraison arrive
     else : 
-        stock_temp += 
-
+        stock_temp += Q
+        if attente_temp > 0:
+            if attente_temp< Q :                
+                stock_temp -= attente_temp
+                attente_temp = 0
+    
 
 
 
