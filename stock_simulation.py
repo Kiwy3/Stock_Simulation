@@ -67,7 +67,6 @@ def commande(lamb1,lamb2):
 
 col= ["time","event_type","stock","attente","perte_magasin","deliv"]
 Timeline = pd.DataFrame(columns=col)
-r=2
 Timeline.loc[0] = [0.,-1,r,0,0,0]
 
 #Init value
@@ -75,7 +74,7 @@ i=1
 time_appro = 800
 t=0
 
-while i<10:
+while i<100:
     Timeline.loc[i]=np.full(6,0)
     
     #Génération nouvelle commande
@@ -84,7 +83,7 @@ while i<10:
 
     #Une commande arrive
     if time_cmd<time_appro : 
-        Timeline.loc[i,"time"] = Timeline.loc[i-1,"time"]+time_cmd
+        Timeline.loc[i,"time"] = time_cmd
         event_temp = type_cmd
 
         #Commande hors ligne
@@ -98,6 +97,7 @@ while i<10:
 
         #Commande en ligne
         else : 
+            Timeline.loc[i,"time"] = time_appro
             Timeline.loc[i,"event_type"]= 2
             if Timeline.loc[i-1,"stock"]>K: #Stock dispo, on livre
                 Timeline.loc[i,"stock"] = Timeline.loc[i-1,"stock"]-1
@@ -107,12 +107,16 @@ while i<10:
     
     #Une livraison arrive
     else : 
-        stock_temp += Q
-        if attente_temp > 0:
-            if attente_temp< Q :                
-                stock_temp -= attente_temp
-                attente_temp = 0
+        Timeline.loc[i,"stock"] = Timeline.loc[i-1,"stock"]+ Q
+        time_appro += 10*(lambda1+lambda2)
+        if Timeline.loc[i-1,"attente"] > 0:
+            if Timeline.loc[i-1,"attente"]< Q :                
+                Timeline.loc[i,"stock"] -= Timeline.loc[i-1,"attente"]
+                Timeline.loc[i,"attente"] = 0
     
+    #Recommande
+    if Timeline.loc[i,"stock"] < r :
+        time_appro = Timeline.loc[i,"time"]+L  
 
 
 
@@ -121,56 +125,3 @@ while i<10:
 
 
 
-
-""" full timeline
-full_time_array = np.full(max(X["time"]), range(max(X["time"])))
-timeline = pd.DataFrame(full_time_array,columns=["time"])"""
-
-"""
-i = 1 
-while i< len(X):
-    X.stock.iloc[i]=X.stock.iloc[i-1]-X.deliv.iloc[i-1]+X.incoming.iloc[i-1]
-    X.en_attente.iloc[i]+=X.en_attente.iloc[i-1]
-    t = X.index[i]
-    
-    " => Commande hors ligne (type 1) "
-    if X.cmd_type_1.iloc[i]>0:
-        if X.stock.iloc[i]>=X.cmd_type_1.iloc[i] : 
-            X.deliv.iloc[i] += X.cmd_type_1.iloc[i]
-        else : 
-            X.perte_magasin.iloc[i] += X.cmd_type_1.iloc[i]
-            
-            
-    " => Commande hors ligne (type 1) "
-    if X.cmd_type_2.iloc[i]>0:
-        if X.stock.iloc[i]>=X.cmd_type_2.iloc[i] : 
-            X.deliv.iloc[i] += X.cmd_type_2.iloc[i]
-        else : 
-            X.en_attente.iloc[i] += X.cmd_type_2.iloc[i]
-            
-    " => Recommande fournisseur"
-    if X.stock.iloc[i] < r and X.incoming.iloc[i]==0 :
-        if t+L in X.index : 
-            X.incoming.loc[t+L] = Q
-        else : 
-            print(X.deliv.iloc[i])
-            st = X.stock.iloc[i]-X.deliv.iloc[i]
-            X.loc[t+L] = [0,0,st,0,0,Q,0,0]
-            X=X.sort_index()
-        
-        print(t+L)
-        X.stock.loc[t+L] = X.stock.loc[t+L]-X.en_attente.loc[t]
-        i+=1
-        
-        
-    i+=1
-"""
-"""Plot the stock evolution
-plt.plot(X.index, X.stock)
-plt.title("Evolution du stock")
-plt.ylim(0)
-<<<<<<< HEAD
-plt.show()""" 
-            
-
-a=1
