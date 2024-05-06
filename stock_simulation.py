@@ -5,7 +5,7 @@ Created on Thu Apr 11 14:44:33 2024
 @author: Nathan
 """
 
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import math
@@ -24,36 +24,6 @@ Q = 180 #Quantité de commande
 r = 60 #Point de recommande
 K = 10 #Priorité de classe
 
-def tirage(l1,l2,n):   
-   Tempo = np.full((n,3),0)
-   """quantite de la demande"""
-   d1 = 1
-   d2 = 30
-   t1 = 0
-   t2 = 0
-   i=0
-   p1 = np.random.poisson(l1,1)
-   p2 = np.random.poisson(l2,1)
-   for i in range(100):
-       if t1+p1<t2+p2:
-           Tempo[i,0]= t1+p1
-           Tempo[i,1] = d1
-           p1 = np.random.poisson(l1,1)
-           t1 = t1+p1
-       elif t1+p1==t2+p2: 
-           Tempo[i,0]= t2+p2
-           Tempo[i,1] = d1
-           Tempo[i,2] = d2
-           p1 = np.random.poisson(l1,1)
-           t1 = t1+p1 
-           p2 = np.random.poisson(l2,1)
-           t2 = t2+p2
-       else : 
-           Tempo[i,0]= t2+p2
-           Tempo[i,2] = d2
-           p2 = np.random.poisson(l2,1)
-           t2 = t2+p2            
-   return Tempo
 
 def commande(lamb1,lamb2):
     lamb = lamb1 + lamb2
