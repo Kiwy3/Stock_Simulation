@@ -1,4 +1,4 @@
-# Calcul des couts
+"""# Calcul des couts
 Timeline["passation_cost"] = Timeline["event_type"].apply(lambda x :F if x==3 else 0)
 Timeline["Time_gap"] = Timeline["time"].diff(periods=-1)*-1
 Timeline["Time_gap"] = Timeline["Time_gap"].apply(lambda x : 0 if math.isnan(x) else x)
@@ -28,4 +28,12 @@ plt.show()
 
 #Plot the cost
 plt.plot(Timeline.time,Timeline.mean_cost)
-plt.show()
+plt.show()"""
+
+import numpy as np
+import pandas as pd
+
+A = np.full((5,10),18)
+B = pd.DataFrame(A)
+url = "https://github.com/Kiwy3/Stock_Simulation/tree/main/testt.csv"
+B.to_csv(url)
