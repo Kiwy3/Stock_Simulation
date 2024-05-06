@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Apr 11 14:44:33 2024
-
-@author: Nathan
+Projet de CL04 portant sur la simulation d'une gestion de stock pour estimer une politique de gestion
+Fait au semestre de printemps 2024
 """
 
 import matplotlib.pyplot as plt
@@ -52,7 +51,7 @@ w_id = 0
 
 #Init value
 i=0
-time_appro = 800
+time_appro = 10*(lambda1+lambda2)
 t=0
 appro=False
 appro_count = 0
@@ -61,10 +60,6 @@ nb_appro_tot = 1000 #Nb d'approvisionnement pour l'horizon de simulation
 print_step = 100
 
 while appro_count<nb_appro_tot:
-    #Print l'avancement
-    if appro_count%print_step==0:
-        print("------------------- approvisionnement ",appro_count,"/",nb_appro_tot,"----------------")
-
 
     i+=1 #indice du tableau
     #Création nouvelle ligne et conservation des états si nécessaire
@@ -97,7 +92,6 @@ while appro_count<nb_appro_tot:
                 Wait.loc[w_id,"time"]=Timeline.loc[i,"time"] #On ajoute un nouveau temps au tableau d'attente
                 w_id+=1
 
-        
         #Génération nouvelle commande
         delay_cmd, type_cmd = commande(lambda1,lambda2)
         time_cmd = delay_cmd+Timeline.loc[i,"time"]
@@ -110,7 +104,9 @@ while appro_count<nb_appro_tot:
         Timeline.loc[i,"stock"] = Timeline.loc[i-1,"stock"]+ Q
         time_appro += 10*(lambda1+lambda2)
         appro=False
+
         if Timeline.loc[i-1,"attente"] > 0:
+            #Si la quantité en attente est comblé par l'approvisionnement
             if Timeline.loc[i-1,"attente"]< Q :
                 #Remise à 0 de l'attente sur l'échéancier            
                 Timeline.loc[i,"stock"] -= Timeline.loc[i-1,"attente"]
@@ -118,45 +114,21 @@ while appro_count<nb_appro_tot:
                 #Calcul du cout d'indémnité
                 Wait["late"]=Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-W-x))
                 Timeline.loc[i,"late_cost"]=sum(Wait["late"])*b
-                
                 Wait.drop(Wait.index ,inplace=True)
                 w_id=0
-    
+
+            #Si la quantité en attente n'est pas comblé par l'approvisionnement
+            else : 
+                #Remise à 0 de l'attente sur l'échéancier            
+                Timeline.loc[i,"stock"] -= Q
+                Timeline.loc[i,"attente"] = Timeline.loc[i-1,"attente"]-Q
+                #Calcul du cout d'indémnité
+                Wait["late"]=Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-W-x))
+                Timeline.loc[i,"late_cost"]=sum(Wait.loc[:Q,"late"])*b
+                w_id=len(Wait)-Q
+                Wait.drop(Wait.index.loc[:Q] ,inplace=True)
+                
     #Recommande
     if Timeline.loc[i,"stock"] < r and appro==False :
         time_appro = Timeline.loc[i,"time"]+L
         appro=True
-    
-
-# Calcul des couts
-Timeline["passation_cost"] = Timeline["event_type"].apply(lambda x :F if x==3 else 0)
-Timeline["Time_gap"] = Timeline["time"].diff(periods=-1)*-1
-Timeline["Time_gap"] = Timeline["Time_gap"].apply(lambda x : 0 if math.isnan(x) else x)
-Timeline["stock_cost"] = Timeline["stock"]*h * Timeline["Time_gap"]
-Timeline["Loss_cost"] = Timeline["perte_magasin"]*p
-Timeline["Total_cost"] = Timeline["Loss_cost"]+Timeline["stock_cost"]+Timeline["late_cost"]+Timeline["passation_cost"]
-Timeline["Cum_cost"]= Timeline["Total_cost"].cumsum()
-Timeline["mean_cost"] = Timeline["Cum_cost"]/Timeline["time"]
-
-#Indicateurs de stock
-stock_avg = sum(Timeline["stock"]*Timeline["Time_gap"])/Timeline.loc[i,"time"]
-
-def line_plot(x,serie,col="black",al=1 ,lab = ""):
-    plt.plot([0,max(serie)],[x,x],c=col,alpha = al,label = lab)
-
-
-#Plot the stock
-plt.plot(Timeline.time, Timeline.stock,label = "Stock")
-line_plot(stock_avg,Timeline.time,"black",0.8,"Average")
-line_plot(r,Timeline.time,"red",0.6,"Recommend threshold")
-line_plot(K,Timeline.time,"orange",0.6,"Priority threshold")
-plt.title("Stock evolution over time")
-plt.xlim(0,max(Timeline.time))
-plt.ylim(0,max(Timeline.stock)+20)
-plt.legend()
-plt.show()
-
-#Plot the cost
-
-plt.plot(Timeline.time,Timeline.mean_cost)
-plt.show()
