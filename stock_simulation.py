@@ -22,6 +22,7 @@ b = 5 #Indemnité de retard
 Q = 180 #Quantité de commande
 r = 60 #Point de recommande
 K = 10 #Priorité de classe
+K = 60 #Change the value
 
 
 def commande(lamb1,lamb2):
@@ -132,3 +133,12 @@ while appro_count<nb_appro_tot:
     if Timeline.loc[i,"stock"] < r and appro==False :
         time_appro = Timeline.loc[i,"time"]+L
         appro=True
+
+        if appro_count%print_step==0:
+            print("----------------------------------- appro "+str(appro_count)+"/"+str(nb_appro_tot)+"-----------------------------------")
+
+print("----------------------------------- appro "+str(appro_count)+"/"+str(nb_appro_tot)+"-----------------------------------")
+name = "CL04_export_"+str(nb_appro_tot)+"_K"+str(K)
+path = "G:\Mon Drive\COURS\GI06\IF29\Stock_Simulation"
+a = path+"/"+name+".csv"
+Timeline.to_csv(a)
