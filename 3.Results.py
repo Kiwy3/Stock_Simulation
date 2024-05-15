@@ -27,12 +27,13 @@ def indicat(f,K):
     #Niveau moyen de stock
     temp[1] = sum(T["stock"]*T["Time_gap"])/T.time.max()
     #Perte en magasin
-    temp[2] = T.where(T.event_type == 1).deliv.count()
-    temp[3] = T.where(T.event_type == 1).perte_magasin.sum()
+    temp[2] = T.where(T.event_type == 1).time.count() #total_mag
+    temp[3] = T.where(T.event_type == 1).perte_magasin.sum() #perte_mag
     temp[4] = temp[3]/temp[2]
     #Attente en ligne
-    temp[5] = T.where(T.event_type == 2).deliv.count()
-    temp[6] = T.where(T.event_type == 2).where(T.deliv == 0).deliv.count()
+    temp[5] = T.where(T.event_type == 2).time.count()
+    # A changer quand je run la prochaine simulation
+    temp[6] = temp[5] - T.where(T.event_type == 2).where(T.deliv == True).deliv.count()
     temp[7] = temp[6]/temp[5]
     #Cout total moyen 
     temp[8] = T.iloc[-1].mean_cost
@@ -44,7 +45,8 @@ Results = pd.DataFrame(columns = ["K","stock_avg","total_mag","perte_mag","ratio
 
 
 for i,K in enumerate(K_list) :
-    file_name = "STP2_Finished_T"+str(nb)+"_K"+str(K)+".csv"
-    A = indicat(file_name,K)
-    Results.loc[i] = A
+    file_name = "Finished_T"+str(nb)+"_K"+str(K)+".csv"
+    Results.loc[i] = indicat(file_name,K)
 Results.sort_values("K",inplace=True)
+
+Results
