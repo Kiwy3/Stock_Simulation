@@ -8,8 +8,6 @@ author : Nathan Davouse
 import numpy as np
 import pandas as pd
 import math
-from os import listdir
-from os.path import isfile, join
 
 param = {
         #Commandes
@@ -33,14 +31,14 @@ param = {
 
 
 K_list = [0,10,20,30,40,50,60]
-nb=10
-load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\1.Instances"
-export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\2.Instances_costs"
+nb=1000
+load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\1.Instances\\"
+export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\2.Instances_costs\\"
 
 for K in K_list : 
     #put csv files in pd Dataframe
     T_name = "Timeline"+str(nb)+"_K"+str(K)+".csv"
-    Timeline = pd.read_csv(load_path+"\\"+T_name,index_col=0)
+    Timeline = pd.read_csv(load_path+T_name,index_col=0)
     W_name = "Wait"+str(nb)+"_K"+str(K)+".csv"
     Wait = pd.read_csv(load_path+"\\"+W_name,index_col=0)
     #manage time
@@ -63,4 +61,4 @@ for K in K_list :
     Timeline.loc[0,"mean_cost"] = Timeline.loc[0,"Total_cost"]
     #new file name
     F_name = "Finished_T"+str(nb)+"_K"+str(K)+".csv"
-    Timeline.to_csv(export_path+"\\STP2_"+F_name)
+    Timeline.to_csv(export_path+F_name)
