@@ -7,7 +7,6 @@ Fait au semestre de printemps 2024
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import math
 
 #On suppose qu'aucun évenement ne peut arriver totalement en même temps
 param = {
@@ -15,7 +14,7 @@ param = {
         "lambda1" : 15 #Commande hors ligne
          ,"lambda2" : 30 #Commande en ligne
         #Approvisionnement
-        ,"L" : 5 #Délai de livraison approvisionnement
+        ,"L" : 2 #Délai de livraison approvisionnement
         ,"W" : 1 # Délai acceptable pour une commande en ligne
         ,"Q" : 180 #Quantité de commande
         ,"r" : 60 #Point de recommande
@@ -41,17 +40,17 @@ def commande(lamb1,lamb2):
     return t,cm
 def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
     #Création de l'échéancier en utilisant la librairie pandas
-    col= ["time","event_type","stock","attente","perte_magasin","deliv","late_cost"]
+    col= ["time","event_type","stock","attente","perte_magasin","deliv"]
     Timeline = pd.DataFrame(columns=col)
     Timeline.loc[0]=np.full(len(col),0)
     Timeline["time"]=Timeline["time"].astype(float)
-    Timeline["late_cost"]=Timeline["late_cost"].astype(float)
+    #Timeline["late_cost"]=Timeline["late_cost"].astype(float)
     Timeline["deliv"]=Timeline["deliv"].astype(bool)
-    Timeline.loc[0,"time"]= -1
+    Timeline.loc[0,"time"]= 0
     Timeline.loc[0,"stock"]=param["r"]
 
     #Création de la table d'attente
-    Wait_col = ["time","late","release_date"]
+    Wait_col = ["time","late","release_id"]
     Wait = pd.DataFrame(columns=Wait_col)
     w_id = 0
     last_w_id = 0
@@ -120,7 +119,7 @@ def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
                     Timeline.loc[i,"attente"] = 0
                     #Gestion de l'échéancier de retard
                     Wait.loc[last_w_id:w_id,"late"]=Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-param["W"]-x))
-                    Wait.loc[last_w_id:w_id,"release_date"] = Timeline.loc[i,"time"]
+                    Wait.loc[last_w_id:w_id,"release_id"] = i
                     last_w_id = w_id
 
                 #Si la quantité en attente n'est pas comblé par l'approvisionnement
@@ -129,11 +128,11 @@ def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
                     Timeline.loc[i,"stock"] -= param["Q"]
                     Timeline.loc[i,"attente"] = Timeline.loc[i-1,"attente"]-param["Q"]
                     #Calcul du cout d'indémnité
-                    Wait["late"][Wait["release_date"].isnull()][:param["Q"]]= Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-param["W"]-x))
-                    Wait["release_date"][Wait["release_date"].isnull()][:param["Q"]] = Timeline.loc[i,"time"]
+                    Wait["late"][Wait["release_id"].isnull()][:param["Q"]]= Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-param["W"]-x))
+                    Wait["release_id"][Wait["release_id"].isnull()][:param["Q"]] = Timeline.loc[i,"time"]
                     #Gestion de l'échéancier de retard
                     Wait.loc[last_w_id:last_w_id+param["Q"],"late"]=Wait["time"].apply(lambda x: max(0.,Timeline.loc[i,"time"]-param["W"]-x))
-                    Wait.loc[last_w_id:last_w_id+param["Q"],"release_date"] = Timeline.loc[i,"time"]
+                    Wait.loc[last_w_id:last_w_id+param["Q"],"release_id"] = i
                     last_w_id += param["Q"]
                     
         #Recommande
@@ -147,19 +146,37 @@ def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
     #return the table
     return Timeline,Wait
 
-def csv_export(Dataf , name):
+def csv_export(Dataf , name,nb_appro,K):
     path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1"
     csv_name = str(name)+str(nb_appro)+"_K"+str(K)
     path_name = path+"/"+csv_name+".csv"
     Dataf.to_csv(path_name)
 
+K_list = [0,10,20,30,40,50,60]
 K_list = [10]
 
-nb_appro = 10
+nb_appro = 1000
 for K in K_list :
     param["K"] = K
     Tl , W = simulation(param,nb_appro_tot=nb_appro)
-    csv_export(Tl,"Timeline")
-    csv_export(W,"Wait")
+    csv_export(Tl,"Timeline",nb_appro,K)
+    csv_export(W,"Wait",nb_appro,K)
+
+"""
+#small plot
+def line_plot(x,serie,col="black",al=1 ,lab = ""):
+    plt.plot([0,max(serie)],[x,x],c=col,alpha = al,label = lab)
 
 
+#Plot the stock
+plt.plot(Tl.time, Tl.stock,label = "Stock")
+plt.plot(Tl.time, Tl.attente,label = "attente")
+line_plot(param["r"],Tl.time,"red",0.6,"Recommend threshold")
+line_plot(param["K"],Tl.time,"orange",0.6,"Priority threshold")
+plt.title("Stock evolution over time")
+plt.xlim(min(Tl.time),max(Tl.time))
+plt.ylim(min(Tl.stock),max(Tl.stock)+40)
+plt.ylabel("number of products (unit)")
+plt.xlabel("time")
+plt.legend()
+plt.show()"""
