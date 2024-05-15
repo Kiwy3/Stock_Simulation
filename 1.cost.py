@@ -24,18 +24,26 @@ param = {
         ,"K" : 10 #Priorité de classe
 }
 
-path = "C:\Users\Nathan\CL04\Stock_Simulation\export_test_stp1"
-files = [f for f in listdir(path) if isfile(join(path, f))]
-new_path = "G:\Mon Drive\COURS\GI06\IF29\Stock_Simulation\Export_stp2"
+
+"""
+Wait = pd.read_csv("C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1\\Wait10_K10.csv")
+Timeline = pd.read_csv("C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1\\Timeline10_K10.csv")
+
+table = Wait.groupby("release_id")["late"].sum()
+Timeline.loc[table.index,"late_cost"] = table"""
+
 K_list = [0,10,20,30,40,50,60]
-nb = 1000
+K_list = [10]
+nb=1000
+load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1"
+export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\Step2"
 
 for K in K_list : 
     #put csv files in pd Dataframe
     T_name = "Timeline"+str(nb)+"_K"+str(K)+".csv"
-    Timeline = pd.read_csv(path+"\\"+T_name,index_col=0)
+    Timeline = pd.read_csv(load_path+"\\"+T_name,index_col=0)
     W_name = "Wait"+str(nb)+"_K"+str(K)+".csv"
-    Wait = pd.read_csv(path+"\\"+T_name,index_col=0)
+    Wait = pd.read_csv(load_path+"\\"+W_name,index_col=0)
     #manage time
     Timeline.loc[0,"time"]= 0
     Timeline["Time_gap"] = Timeline["time"].diff(periods=-1)*-1
@@ -47,15 +55,13 @@ for K in K_list :
     #Cout de perte de vente en magasin
     Timeline["Loss_cost"] = Timeline["perte_magasin"]*param["p"]
     #cout de retard
-    late_table = Wait.groupby("release_date")["late"].sum()
-    #finish late cost
-
+    late_table = Wait.groupby("release_id")["late"].sum()
+    Timeline.loc[late_table.index,"late_cost"] = late_table
     #Couts totaux
-    Timeline["Total_cost"] = Timeline["Loss_cost"]+Timeline["stock_cost"]+Timeline["late_cost"]+Timeline["passation_cost"]
+    Timeline["Total_cost"] = Timeline.loc["passation_cost":"late_cost"].sum()
+    #Timeline["Total_cost"] = Timeline.apply(lambda x : x.loc["passation_cost":"late_cost"].sum())
     Timeline["Cum_cost"]= Timeline["Total_cost"].cumsum()
-    Timeline["mean_cost"] = Timeline["Cum_cost"]/Timeline["time"]
+    #Timeline.loc[2:,"mean_cost"] = Timeline["Cum_cost"]/Timeline["time"]
     #new file name
     F_name = "Finished_T"+str(nb)+"_K"+str(K)+".csv"
-    Timeline.to_csv(new_path+"\\STP2_"+F_name)
-
-
+    Timeline.to_csv(export_path+"\\STP2_"+F_name)

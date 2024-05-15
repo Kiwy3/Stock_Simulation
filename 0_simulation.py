@@ -154,7 +154,7 @@ def csv_export(Dataf , name,nb_appro,K):
 
 K_list = [0,10,20,30,40,50,60]
 K_list = [10]
-
+K_list = [30,40,50,60]
 nb_appro = 1000
 for K in K_list :
     param["K"] = K
