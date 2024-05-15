@@ -1,4 +1,9 @@
-
+# -*- coding: utf-8 -*-
+"""
+Ajout des colonnes concernant les couts liées aux instances de stock
+Dans le cadre du cours de CL04
+author : Nathan Davouse
+"""
 
 import numpy as np
 import pandas as pd
@@ -25,18 +30,12 @@ param = {
 }
 
 
-"""
-Wait = pd.read_csv("C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1\\Wait10_K10.csv")
-Timeline = pd.read_csv("C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1\\Timeline10_K10.csv")
 
-table = Wait.groupby("release_id")["late"].sum()
-Timeline.loc[table.index,"late_cost"] = table"""
 
 K_list = [0,10,20,30,40,50,60]
-K_list = [10]
-nb=1000
-load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1"
-export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\Step2"
+nb=10
+load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\1.Instances"
+export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\2.Instances_costs"
 
 for K in K_list : 
     #put csv files in pd Dataframe
@@ -58,10 +57,10 @@ for K in K_list :
     late_table = Wait.groupby("release_id")["late"].sum()
     Timeline.loc[late_table.index,"late_cost"] = late_table
     #Couts totaux
-    Timeline["Total_cost"] = Timeline.loc["passation_cost":"late_cost"].sum()
-    #Timeline["Total_cost"] = Timeline.apply(lambda x : x.loc["passation_cost":"late_cost"].sum())
+    Timeline["Total_cost"] = Timeline["passation_cost"]+Timeline["stock_cost"]+Timeline["Loss_cost"].to_numpy(na_value=0)+Timeline["late_cost"].to_numpy(na_value=0)
     Timeline["Cum_cost"]= Timeline["Total_cost"].cumsum()
-    #Timeline.loc[2:,"mean_cost"] = Timeline["Cum_cost"]/Timeline["time"]
+    Timeline["mean_cost"] = np.divide(Timeline["Cum_cost"],Timeline["time"])
+    Timeline.loc[0,"mean_cost"] = Timeline.loc[0,"Total_cost"]
     #new file name
     F_name = "Finished_T"+str(nb)+"_K"+str(K)+".csv"
     Timeline.to_csv(export_path+"\\STP2_"+F_name)

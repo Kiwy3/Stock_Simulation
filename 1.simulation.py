@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Projet de CL04 portant sur la simulation d'une gestion de stock pour estimer une politique de gestion
-Fait au semestre de printemps 2024
+Génération d'instances résultant de la simulation d'un stock avec une politique de stock
+Dans le cadre du cours de CL04
+author : Nathan Davouse
 """
+
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -147,16 +150,15 @@ def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
     return Timeline,Wait
 
 def csv_export(Dataf , name,nb_appro,K):
-    path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\export_test_stp1"
+    path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\1.instances"
     csv_name = str(name)+str(nb_appro)+"_K"+str(K)
     path_name = path+"/"+csv_name+".csv"
     Dataf.to_csv(path_name)
 
 K_list = [0,10,20,30,40,50,60]
 K_list = [10]
-K_list = [30,40,50,60]
-nb_appro = 1000
-for K in K_list :
+nb_appro = 10
+for K in K_list : 
     param["K"] = K
     Tl , W = simulation(param,nb_appro_tot=nb_appro)
     csv_export(Tl,"Timeline",nb_appro,K)
