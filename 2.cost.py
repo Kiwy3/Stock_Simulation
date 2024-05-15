@@ -8,24 +8,12 @@ author : Nathan Davouse
 import numpy as np
 import pandas as pd
 import math
+import json
 
-param = {
-        #Commandes
-        "lambda1" : 15 #Commande hors ligne
-         ,"lambda2" : 30 #Commande en ligne
-        #Approvisionnement
-        ,"L" : 2 #Délai de livraison approvisionnement
-        ,"W" : 1 # Délai acceptable pour une commande en ligne
-        ,"Q" : 180 #Quantité de commande
-        ,"r" : 60 #Point de recommande
-        #Couts
-        ,"F" : 18 #Cout de passation de commandE
-        ,"h" : 0.05 #Cout de stockage
-        ,"p" : 20 #Cout de perte unitaire
-        ,"b" : 5 #Indemnité de retard
-        #Paramètre de priorisation
-        ,"K" : 10 #Priorité de classe
-}
+#Load instances parameters
+path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation"
+with open(path+"\\"+'param.json') as json_file:
+    param = json.load(json_file)
 
 
 
@@ -54,6 +42,9 @@ for K in K_list :
     #cout de retard
     late_table = Wait.groupby("release_id")["late"].sum()
     Timeline.loc[late_table.index,"late_cost"] = late_table
+    #Compter le nombre de retard
+    late_table = Wait.where(Wait["late"]>0).groupby("release_id")["late"].count()
+    Timeline.loc[late_table.index,"late_nb"] = late_table
     #Couts totaux
     Timeline["Total_cost"] = Timeline["passation_cost"]+Timeline["stock_cost"]+Timeline["Loss_cost"].to_numpy(na_value=0)+Timeline["late_cost"].to_numpy(na_value=0)
     Timeline["Cum_cost"]= Timeline["Total_cost"].cumsum()

@@ -7,15 +7,16 @@ author : Nathan Davouse
 import json
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 
 #Global variables
-path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation"
+path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\"
 load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\2.Instances_costs"
 K_list = [0,10,20,30,40,50,60]
 nb = 1000
 
 #Load instances parameters
-with open(path+"\\"+'param.json') as json_file:
+with open(path+'param.json') as json_file:
     param = json.load(json_file)
 
 #Calculation func
@@ -33,20 +34,19 @@ def indicat(f,K):
     #Attente en ligne
     temp[5] = T.where(T.event_type == 2).time.count()
     # A changer quand je run la prochaine simulation
-    temp[6] = temp[5] - T.where(T.event_type == 2).where(T.deliv == True).deliv.count()
+    temp[6] = T.late_nb.sum()
     temp[7] = temp[6]/temp[5]
     #Cout total moyen 
     temp[8] = T.iloc[-1].mean_cost
     #Return
     return temp
 
+#init results df
 Results = pd.DataFrame(columns = ["K","stock_avg","total_mag","perte_mag","ratio_mag","total_ligne","perte_ligne","ratio_ligne","avg_total_cost"])
-
-
 
 for i,K in enumerate(K_list) :
     file_name = "Finished_T"+str(nb)+"_K"+str(K)+".csv"
     Results.loc[i] = indicat(file_name,K)
 Results.sort_values("K",inplace=True)
 
-Results
+Results.to_csv(path+"results.csv")

@@ -5,30 +5,16 @@ Dans le cadre du cours de CL04
 author : Nathan Davouse
 """
 
-
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import json
 
 #On suppose qu'aucun évenement ne peut arriver totalement en même temps
-param = {
-        #Commandes
-        "lambda1" : 15 #Commande hors ligne
-         ,"lambda2" : 30 #Commande en ligne
-        #Approvisionnement
-        ,"L" : 2 #Délai de livraison approvisionnement
-        ,"W" : 1 # Délai acceptable pour une commande en ligne
-        ,"Q" : 180 #Quantité de commande
-        ,"r" : 60 #Point de recommande
-        #Couts
-        ,"F" : 18 #Cout de passation de commandE
-        ,"h" : 0.05 #Cout de stockage
-        ,"p" : 20 #Cout de perte unitaire
-        ,"b" : 5 #Indemnité de retard
-        #Paramètre de priorisation
-        ,"K" : 10 #Priorité de classe
-}
+
+#Load instances parameters
+path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation"
+with open(path+"\\"+'param.json') as json_file:
+    param = json.load(json_file)
 
 
 def commande(lamb1,lamb2):
@@ -41,6 +27,7 @@ def commande(lamb1,lamb2):
     else : 
         cm = 1
     return t,cm
+
 def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
     #Création de l'échéancier en utilisant la librairie pandas
     col= ["time","event_type","stock","attente","perte_magasin","deliv"]
@@ -98,6 +85,7 @@ def simulation (param,impr = True,print_step = 100,nb_appro_tot = 1000):
                 else : #Stock inférieur à K, on met en attente
                     Timeline.loc[i,"attente"] = Timeline.loc[i-1,"attente"]+1
                     Wait.loc[w_id,"time"]=Timeline.loc[i,"time"] #On ajoute un nouveau temps au tableau d'attente
+                    Timeline.loc[i,"deliv"] = True
                     w_id+=1
 
             #Génération nouvelle commande
