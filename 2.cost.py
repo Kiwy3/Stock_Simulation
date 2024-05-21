@@ -12,7 +12,7 @@ import json
 
 #Load instances parameters
 path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation"
-with open(path+"\\"+'param.json') as json_file:
+with open('param.json') as json_file:
     param = json.load(json_file)
 
 
@@ -20,8 +20,8 @@ with open(path+"\\"+'param.json') as json_file:
 
 K_list = [0,10,20,30,40,50,60]
 nb=1000
-load_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\1.Instances\\"
-export_path = "C:\\Users\\Nathan\\CL04\\Stock_Simulation\\2.Instances_costs\\"
+load_path = "1.Instances\\"
+export_path = "2.Instances_costs\\"
 
 for K in K_list : 
     #put csv files in pd Dataframe
@@ -41,7 +41,7 @@ for K in K_list :
     Timeline["Loss_cost"] = Timeline["perte_magasin"]*param["p"]
     #cout de retard
     late_table = Wait.groupby("release_id")["late"].sum()
-    Timeline.loc[late_table.index,"late_cost"] = late_table
+    Timeline.loc[late_table.index,"late_cost"] = late_table * param["b"]
     #Compter le nombre de retard
     late_table = Wait.where(Wait["late"]>0).groupby("release_id")["late"].count()
     Timeline.loc[late_table.index,"late_nb"] = late_table

@@ -17,6 +17,7 @@ def stock(Results):
     #Global fig
     ax1.set_xlabel("K")
     fig.legend()
+    fig.show()
     return 0
 
 def line_plot(x,serie,col="black",al=1 ,lab = ""):
